@@ -68,18 +68,34 @@ export default (models) => {
   const list = async () => {
     try {
       const items = await Alumni.findAll();
-      return items;
+
+      const result = items.map(a => ({
+        ...a.dataValues,
+        foto_url: a.foto 
+          ? `http://localhost:3000/uploads/alumni/${a.foto}`
+          : null
+      }));
+
+      return result;
+
     } catch (err) {
       return { error: err.message };
     }
   };
 
-  // ------------------ GET ------------------
+    // ------------------ GET ------------------
   const get = async (request, h) => {
     try {
       const item = await Alumni.findByPk(request.params.id);
       if (!item) return h.response({ error: 'Not found' }).code(404);
-      return h.response(item);
+
+      return h.response({
+        ...item.dataValues,
+        foto_url: item.foto
+          ? `http://localhost:3000/uploads/alumni/${item.foto}`
+          : null
+      });
+
     } catch (err) {
       return h.response({ error: err.message }).code(500);
     }

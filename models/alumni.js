@@ -1,3 +1,4 @@
+import { type } from 'os';
 import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
@@ -23,6 +24,10 @@ export default (sequelize) => {
       },
       prodi: {
         type: DataTypes.STRING,
+        allowNull: false
+      },
+      angkatan: {
+        type: DataTypes.INTEGER,
         allowNull: false
       },
       tahun_masuk: {

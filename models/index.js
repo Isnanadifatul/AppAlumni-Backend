@@ -5,5 +5,5 @@ export const init = async (sequelize) => {
   const Alumni = AlumniModel(sequelize);
   const MasterAlumni = MasterAlumniModel(sequelize);
 
-  return { Alumni, MasterAlumni };
+  return { Alumni, MasterAlumni};
 };

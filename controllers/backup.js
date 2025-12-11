@@ -6,20 +6,34 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default (models) => {
-  const Alumni = models.Alumni;
+  const { Alumni, MasterAlumni } = models;
 
   // ------------------ CREATE ------------------
   const create = async (request, h) => {
     try {
       const payload = request.payload;
 
-      // Validasi NIM
-      const exists = await Alumni.findOne({ where: { nim: payload.nim } });
+      // 1. CEK NIM DI MASTER ALUMNI
+      const cekMaster = await MasterAlumni.findOne({
+        where: { nim: payload.nim }
+      });
+
+      if (!cekMaster) {
+        return h
+          .response({ error: 'NIM yang anda masukkan salah' })
+          .code(400);
+      }
+
+      // 2. CEK DUPLIKAT DI TABEL ALUMNI
+      const exists = await Alumni.findOne({
+        where: { nim: payload.nim }
+      });
+
       if (exists) {
         return h.response({ error: 'NIM already exists' }).code(409);
       }
 
-      // PROSES FOTO UPLOAD
+      // PROSES UPLOAD FOTO
       let fotoFilename = null;
       const fotoFile = payload.foto;
 
@@ -56,12 +70,12 @@ export default (models) => {
   };
 
   // ------------------ LIST ------------------
-  const list = async (request, h) => {
+  const list = async () => {
     try {
       const items = await Alumni.findAll();
-      return h.response(items);
+      return items;
     } catch (err) {
-      return h.response({ error: err.message }).code(500);
+      return { error: err.message };
     }
   };
 
@@ -85,7 +99,7 @@ export default (models) => {
       const item = await Alumni.findByPk(id);
       if (!item) return h.response({ error: 'Not found' }).code(404);
 
-      // Cek NIM duplicate
+      // Cek duplicate NIM
       if (payload.nim && payload.nim !== item.nim) {
         const exist = await Alumni.findOne({ where: { nim: payload.nim } });
         if (exist) {
@@ -93,13 +107,14 @@ export default (models) => {
         }
       }
 
-      // PROSES FOTO BARU (JIKA ADA)
+      // FOTO BARU
       let fotoFilename = item.foto;
       const fotoFile = payload.foto;
 
       if (fotoFile && fotoFile.hapi) {
         const uploadFolder = path.join(__dirname, '..', 'uploads', 'alumni');
-        if (!fs.existsSync(uploadFolder)) fs.mkdirSync(uploadFolder, { recursive: true });
+        if (!fs.existsSync(uploadFolder))
+          fs.mkdirSync(uploadFolder, { recursive: true });
 
         fotoFilename = Date.now() + '-' + fotoFile.hapi.filename;
         const newPath = path.join(uploadFolder, fotoFilename);

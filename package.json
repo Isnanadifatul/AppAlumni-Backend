@@ -14,8 +14,10 @@
   "dependencies": {
     "@hapi/hapi": "^21.4.4",
     "@hapi/inert": "^7.1.0",
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "mysql2": "^3.15.3",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "sharp": "^0.34.5"
   }
 }

@@ -41,8 +41,7 @@ const alumniRoutes = async (server) => {
       path: '/editAlumni/{id}',
       handler: controller.update,
       options: {
-        payload: {
-          maxBytes: 10 * 1024 * 1024,
+        payload: {          maxBytes: 10 * 1024 * 1024,
           parse: true,
           output: 'stream',
           multipart: true

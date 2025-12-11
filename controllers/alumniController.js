@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { prosesUploadFoto } from '../utils/kompresFoto.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,9 +20,7 @@ export default (models) => {
       });
 
       if (!cekMaster) {
-        return h
-          .response({ error: 'NIM yang anda masukkan salah' })
-          .code(400);
+        return h.response({ error: 'NIM yang anda masukkan salah' }).code(400);
       }
 
       // 2. CEK DUPLIKAT DI TABEL ALUMNI
@@ -39,16 +38,11 @@ export default (models) => {
 
       if (fotoFile && fotoFile.hapi) {
         const uploadFolder = path.join(__dirname, '..', 'uploads', 'alumni');
-
         if (!fs.existsSync(uploadFolder)) {
           fs.mkdirSync(uploadFolder, { recursive: true });
         }
 
-        fotoFilename = Date.now() + '-' + fotoFile.hapi.filename;
-        const filePath = path.join(uploadFolder, fotoFilename);
-
-        const fileStream = fs.createWriteStream(filePath);
-        fotoFile.pipe(fileStream);
+        fotoFilename = await prosesUploadFoto(fotoFile, uploadFolder);
       }
 
       const item = await Alumni.create({
@@ -63,6 +57,7 @@ export default (models) => {
       });
 
       return h.response(item).code(201);
+
     } catch (err) {
       console.error(err);
       return h.response({ error: err.message }).code(500);
@@ -116,11 +111,14 @@ export default (models) => {
         if (!fs.existsSync(uploadFolder))
           fs.mkdirSync(uploadFolder, { recursive: true });
 
-        fotoFilename = Date.now() + '-' + fotoFile.hapi.filename;
-        const newPath = path.join(uploadFolder, fotoFilename);
+        // Hapus foto lama jika ada
+        if (item.foto) {
+          const oldPath = path.join(uploadFolder, item.foto);
+          if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        }
 
-        const fileStream = fs.createWriteStream(newPath);
-        fotoFile.pipe(fileStream);
+        // Upload foto baru
+        fotoFilename = await prosesUploadFoto(fotoFile, uploadFolder);
       }
 
       await item.update({
@@ -135,7 +133,9 @@ export default (models) => {
       });
 
       return h.response(item);
+
     } catch (err) {
+      console.error(err);
       return h.response({ error: err.message }).code(500);
     }
   };
@@ -144,7 +144,14 @@ export default (models) => {
   const remove = async (request, h) => {
     try {
       const item = await Alumni.findByPk(request.params.id);
-      if (!item) return h.response({ error: 'Not found' }).code(404);
+      if (!item) return h.response({ error: "Not found" }).code(404);
+
+      // Hapus foto jika ada
+      if (item.foto) {
+        const folder = path.join(__dirname, "..", "uploads", "alumni");
+        const fotoPath = path.join(folder, item.foto);
+        if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
+      }
 
       await item.destroy();
       return h.response({ success: true });
@@ -153,5 +160,8 @@ export default (models) => {
     }
   };
 
+  // ------------------------
+  // RETURN SEMUA FUNGSI
+  // ------------------------
   return { create, list, get, update, remove };
 };

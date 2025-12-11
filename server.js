@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import Hapi from '@hapi/hapi';
+import Inert from '@hapi/inert';
 import { dbPlugin } from './plugins/db.js';
 import alumniRoutes from './routes/alumniRoutes.js';
 
@@ -10,10 +11,21 @@ const init = async () => {
     routes: { cors: true }
   });
 
-  // Register DB plugin
+  await server.register(Inert);     // Untuk static file
   await server.register(dbPlugin);
 
-  // Register routes
+  // Static folder untuk foto alumni
+  server.route({
+    method: 'GET',
+    path: '/uploads/alumni/{filename}',
+    handler: {
+      directory: {
+        path: 'uploads/alumni',
+        listing: false,
+      }
+    }
+  });
+
   server.route(await alumniRoutes(server));
 
   await server.start();

@@ -34,7 +34,7 @@ const alumniRoutes = async (server) => {
     {
       method: 'GET',
       path: '/searchAlumni/{nim}',
-      handler: controller.get
+      handler: controller.search
     },
     {
       method: 'PUT',

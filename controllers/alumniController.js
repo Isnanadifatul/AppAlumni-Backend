@@ -176,8 +176,28 @@ export default (models) => {
     }
   };
 
+    // ------------------ SEARCH ------------------
+  const search = async (request, h) => {
+    try {
+      const nim = request.params.nim;
+      const item = await Alumni.findOne({ where: { nim } });
+
+      if (!item) return h.response({ error: "Not found" }).code(404);
+
+      return h.response({
+        ...item.dataValues,
+        foto_url: item.foto
+          ? `http://localhost:3000/uploads/alumni/${item.foto}`
+          : null
+      });
+
+    } catch (err) {
+      return h.response({ error: err.message }).code(500);
+    }
+  };
+
   // ------------------------
   // RETURN SEMUA FUNGSI
   // ------------------------
-  return { create, list, get, update, remove };
+  return { create, list, get, update, remove, search };
 };

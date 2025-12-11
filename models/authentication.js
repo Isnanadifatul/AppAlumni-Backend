@@ -7,7 +7,7 @@ export default (sequelize) => {
       id_user: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
-        primaryKey: true,
+        primaryKey: true
       },
       username: {
         type: DataTypes.STRING,

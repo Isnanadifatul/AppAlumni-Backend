@@ -1,4 +1,4 @@
-import authControllerFactory from '../controllers/authController.js';
+import authControllerFactory from "../controllers/authController.js";
 
 const authRoutes = async (server) => {
   const models = server.app.models;
@@ -6,13 +6,13 @@ const authRoutes = async (server) => {
 
   return [
     {
-      method: 'POST',
-      path: '/register',
+      method: "POST",
+      path: "/register",
       handler: controller.register
     },
     {
-      method: 'POST',
-      path: '/login',
+      method: "POST",
+      path: "/login",
       handler: controller.login
     }
   ];

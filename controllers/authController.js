@@ -93,5 +93,59 @@ export default (models) => {
     }
   };
 
-  return { register, login };
+  
+  // ------------------ CHANGE PASSWORD ------------------
+  const changePassword = async (request, h) => {
+    try {
+      const { id_user, old_password, new_password } = request.payload;
+
+      // VALIDASI
+      if (!id_user || !old_password || !new_password) {
+        return h.response({
+          error: 'Semua field wajib diisi'
+        }).code(400);
+      }
+
+      if (new_password.length < 6) {
+        return h.response({
+          error: 'Password baru minimal 6 karakter'
+        }).code(400);
+      }
+
+      // CARI USER
+      const user = await Authentication.findByPk(id_user);
+      if (!user) {
+        return h.response({
+          error: 'User tidak ditemukan'
+        }).code(404);
+      }
+
+      // CEK PASSWORD LAMA
+      const match = await bcrypt.compare(old_password, user.password);
+      if (!match) {
+        return h.response({
+          error: 'Password lama salah'
+        }).code(400);
+      }
+
+      // HASH PASSWORD BARU
+      const hashedPassword = await bcrypt.hash(new_password, SALT_ROUNDS);
+
+      // UPDATE PASSWORD
+      await user.update({
+        password: hashedPassword
+      });
+
+      return h.response({
+        success: true,
+        message: 'Password berhasil diperbarui'
+      });
+
+    } catch (err) {
+      console.error(err);
+      return h.response({ error: err.message }).code(500);
+    }
+  };
+
+  return { register, login, changePassword };
 };

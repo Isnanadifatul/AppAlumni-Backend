@@ -4,6 +4,7 @@ import Inert from '@hapi/inert';
 import { dbPlugin } from './plugins/db.js';
 import alumniRoutes from './routes/alumniRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 const init = async () => {
   const server = Hapi.server({
@@ -29,6 +30,7 @@ const init = async () => {
 
   server.route(await alumniRoutes(server));
   server.route(await authRoutes(server));
+  server.route(await adminRoutes(server));
 
   await server.start();
   console.log('Server running on', server.info.uri);

@@ -14,6 +14,11 @@ const authRoutes = async (server) => {
       method: "POST",
       path: "/login",
       handler: controller.login
+    },
+    {
+      method: 'PUT',
+      path: '/changePassword',
+      handler: controller.changePassword
     }
   ];
 };

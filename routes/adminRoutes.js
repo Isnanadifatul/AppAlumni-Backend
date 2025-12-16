@@ -10,6 +10,11 @@ const adminRoutes = async (server) => {
       method: 'POST',
       path: '/inputAdmin',
       handler: controller.create
+    },
+     {
+      method: 'GET',
+      path: '/listAdmin',
+      handler: controller.listAdmin
     }
   ];
 };

@@ -147,5 +147,30 @@ export default (models) => {
     }
   };
 
-  return { register, login, changePassword };
+// ================= LIST USER =================
+  const listUsers = async (request, h) => {
+    try {
+      const users = await Authentication.findAll({
+        attributes: [
+          'id_user',
+          'username',
+          'id_admin',
+          'id_alumni'
+        ],
+        order: [['id_user', 'ASC']]
+      });
+
+      return h.response({
+        success: true,
+        total: users.length,
+        data: users
+      });
+
+    } catch (err) {
+      console.error(err);
+      return h.response({ error: err.message }).code(500);
+    }
+  };
+
+  return { register, login, changePassword, listUsers};
 };

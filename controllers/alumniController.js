@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default (models) => {
-  const { Alumni, MasterAlumni } = models;
+  const { Alumni, MasterAlumni, Authentication } = models;
 
   // ------------------ CREATE ------------------
   const create = async (request, h) => {
@@ -155,7 +155,7 @@ export default (models) => {
       return h.response({ error: err.message }).code(500);
     }
   };
-
+  /*
   // ------------------ DELETE ------------------
   const remove = async (request, h) => {
     try {
@@ -172,6 +172,52 @@ export default (models) => {
       await item.destroy();
       return h.response({ success: true });
     } catch (err) {
+      return h.response({ error: err.message }).code(500);
+    }
+  };
+  */
+  
+  // ------------------ DELETE ALUMNI + ACCOUNT ------------------
+  const remove = async (request, h) => {
+    try {
+      const { id } = request.params;
+
+      // 1. Cari alumni
+      const alumni = await Alumni.findByPk(id);
+      if (!alumni) {
+        return h.response({ error: 'Alumni tidak ditemukan' }).code(404);
+      }
+
+      // 2. Hapus foto alumni jika ada
+      if (alumni.foto) {
+        const fotoPath = path.join(
+          __dirname,
+          '..',
+          'uploads',
+          'alumni',
+          alumni.foto
+        );
+
+        if (fs.existsSync(fotoPath)) {
+          fs.unlinkSync(fotoPath);
+        }
+      }
+
+      // 3. Hapus akun authentication (jika ada)
+      await Authentication.destroy({
+        where: { id_alumni: alumni.id_alumni }
+      });
+
+      // 4. Hapus data alumni
+      await alumni.destroy();
+
+      return h.response({
+        success: true,
+        message: 'Alumni dan akun berhasil dihapus'
+      });
+
+    } catch (err) {
+      console.error(err);
       return h.response({ error: err.message }).code(500);
     }
   };

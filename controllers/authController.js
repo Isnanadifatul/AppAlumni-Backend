@@ -172,5 +172,55 @@ export default (models) => {
     }
   };
 
-  return { register, login, changePassword, listUsers};
+  // ------------------ UPDATE EMAIL / USERNAME ------------------
+  const updateUsername = async (request, h) => {
+    try {
+      const { id } = request.params;
+      const { username } = request.payload;
+
+      // 1. Validasi input
+      if (!username) {
+        return h.response({ error: 'Username tidak boleh kosong' }).code(400);
+      }
+
+      // 2. Validasi format email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(username)) {
+        return h.response({ error: 'Format email tidak valid' }).code(400);
+      }
+
+      // 3. Cari user
+      const user = await Authentication.findByPk(id);
+      if (!user) {
+        return h.response({ error: 'User tidak ditemukan' }).code(404);
+      }
+
+      // 4. Cek duplikasi email (kecuali dirinya sendiri)
+      const exist = await Authentication.findOne({
+        where: { username }
+      });
+
+      if (exist && exist.id_user !== user.id_user) {
+        return h.response({ error: 'Email sudah digunakan' }).code(409);
+      }
+
+      // 5. Update username
+      await user.update({ username });
+
+      return h.response({
+        success: true,
+        message: 'Email berhasil diperbarui',
+        user: {
+          id_user: user.id_user,
+          username: user.username
+        }
+      });
+
+    } catch (err) {
+      console.error(err);
+      return h.response({ error: err.message }).code(500);
+    }
+  };
+
+  return { register, login, changePassword, listUsers, updateUsername};
 };

@@ -90,3 +90,48 @@ export default (models) => {
 
   return { register, login };
 };
+
+
+
+  // ================= REGISTER =================
+  const register = async (request, h) => {
+    try {
+      const { username, password, id_admin, id_alumni } = request.payload;
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(username)) {
+        return h.response({ error: "Format email tidak valid" }).code(400);
+      }
+
+      const existingUser = await Authentication.findOne({ where: { username } });
+      if (existingUser) {
+        return h.response({ error: "Email sudah terdaftar" }).code(400);
+      }
+
+      if (!password || password.length < 6) {
+        return h.response({ error: "Password minimal 6 karakter" }).code(400);
+      }
+
+      const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+      const newUser = await Authentication.create({
+        username,
+        password: hashedPassword,
+        id_admin: id_admin || null,
+        id_alumni: id_alumni || null
+      });
+
+      return h.response({
+        success: true,
+        message: "Register berhasil",
+        user: {
+          id_user: newUser.id_user,
+          username: newUser.username
+        }
+      }).code(201);
+
+    } catch (err) {
+      console.error("REGISTER ERROR:", err);
+      return h.response({ error: err.message }).code(500);
+    }
+  };

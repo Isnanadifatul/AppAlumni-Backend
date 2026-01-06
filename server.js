@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import Hapi from '@hapi/hapi';
 import Inert from '@hapi/inert';
+import Jwt from '@hapi/jwt';
+
 import { dbPlugin } from './plugins/db.js';
 import alumniRoutes from './routes/alumniRoutes.js';
 import authRoutes from './routes/authRoutes.js';
@@ -13,24 +15,58 @@ const init = async () => {
     routes: { cors: true }
   });
 
-  await server.register(Inert);     // Untuk static file
-  await server.register(dbPlugin);
+  await server.register([
+    Inert,
+    Jwt,
+    dbPlugin
+  ]);
 
-  // Static folder untuk foto alumni
+  /* =======================
+     JWT AUTH STRATEGY
+  ======================= */
+  server.auth.strategy('jwt', 'jwt', {
+    keys: process.env.JWT_SECRET,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: 24 * 60 * 60 // 1 hari
+    },
+    validate: (artifacts, request, h) => {
+      return {
+        isValid: true,
+        credentials: artifacts.decoded.payload
+      };
+    }
+  });
+
+  /* =======================
+     DEFAULT: SEMUA ROUTE
+     WAJIB LOGIN
+  ======================= */
+  server.auth.default('jwt');
+
+  /* =======================
+     STATIC FILE (PUBLIK)
+  ======================= */
   server.route({
     method: 'GET',
     path: '/uploads/alumni/{filename}',
+    options: { auth: false },
     handler: {
       directory: {
         path: 'uploads/alumni',
-        listing: false,
+        listing: false
       }
     }
   });
 
-  server.route(await alumniRoutes(server));
-  server.route(await authRoutes(server));
-  server.route(await adminRoutes(server));
+  /* =======================
+     ROUTES
+  ======================= */
+  server.route(await authRoutes(server));   // login → auth:false di router
+  server.route(await alumniRoutes(server)); // campuran
+  server.route(await adminRoutes(server));  // protected
 
   await server.start();
   console.log('Server running on', server.info.uri);

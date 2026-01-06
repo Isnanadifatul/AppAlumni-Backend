@@ -24,17 +24,26 @@ const alumniRoutes = async (server) => {
     {
       method: 'GET',
       path: '/listAlumni',
-      handler: controller.list
+      handler: controller.list,
+      options:{
+       auth: false
+      }
     },
     {
       method: 'GET',
       path: '/listIdAlumni/{id}',
-      handler: controller.get
+      handler: controller.get,
+       options:{
+       auth: false
+      }
     },
     {
       method: 'GET',
       path: '/searchAlumni/{nim}',
-      handler: controller.search
+      handler: controller.search,
+       options:{
+       auth: false
+      }
     },
     {
       method: 'PUT',
@@ -51,7 +60,7 @@ const alumniRoutes = async (server) => {
     {
       method: 'DELETE',
       path: '/deleteAlumni/{id}',
-      handler: controller.remove
+      handler: controller.remove,
     }
   ];
 };

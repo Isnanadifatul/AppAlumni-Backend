@@ -25,6 +25,10 @@ export default (sequelize) => {
       id_alumni: {
         type: DataTypes.INTEGER,
         allowNull: true
+      },
+      role: {
+        type: DataTypes.STRING,
+        allowNull: false
       }
     },
     {

@@ -56,7 +56,10 @@ export default (models) => {
         foto: fotoFilename
       });
 
-      return h.response(item).code(201);
+      return h.response(
+        {
+        message: "Data Tersimpan"
+      }).code(201);
 
     } catch (err) {
       console.error(err);
@@ -148,7 +151,9 @@ export default (models) => {
         foto: fotoFilename
       });
 
-      return h.response(item);
+      return h.response({
+        message: "Data berhasil diupdate"
+      });
 
     } catch (err) {
       console.error(err);

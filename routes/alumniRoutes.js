@@ -19,7 +19,8 @@ const alumniRoutes = async (server) => {
           output: 'stream',
           multipart: true
         }
-      }
+      },
+       auth: false
     },
     {
       method: 'GET',

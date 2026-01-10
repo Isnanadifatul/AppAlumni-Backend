@@ -6,6 +6,17 @@ const authRoutes = async (server) => {
 
   return [
     {
+      method: 'GET',
+      path: '/',
+      handler: (request, h) => {
+        return {
+          status: 'success',
+          message: 'API berhasil running 🚀',
+          time: new Date().toISOString()
+        };
+      }
+    },
+    {
       method: "POST",
       path: "/register",
       handler: controller.register,

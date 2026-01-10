@@ -40,15 +40,10 @@ const init = async () => {
     }
   });
 
-  /* =======================
-     DEFAULT: SEMUA ROUTE
-     WAJIB LOGIN
-  ======================= */
-  server.auth.default('jwt');
+  
+  server.auth.default('jwt');//default semua routes harus login
 
-  /* =======================
-     STATIC FILE (PUBLIK)
-  ======================= */
+  //static public
   server.route({
     method: 'GET',
     path: '/uploads/alumni/{filename}',
@@ -56,14 +51,13 @@ const init = async () => {
     handler: {
       directory: {
         path: 'uploads/alumni',
-        listing: false
+        listing: false,
+        index: false
       }
     }
   });
 
-  /* =======================
-     ROUTES
-  ======================= */
+//routes
   server.route(await authRoutes(server));   // login → auth:false di router
   server.route(await alumniRoutes(server)); // campuran
   server.route(await adminRoutes(server));  // protected
